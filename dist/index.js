@@ -8490,7 +8490,6 @@ const getPR = async (prNum) => {
 			owner: owner.name ?? owner.login,
 			repo: github.context.payload.repository.name,
 			pull_number: prNum,
-
 		};
 
 		const content = await Promise.all([
@@ -8503,6 +8502,24 @@ const getPR = async (prNum) => {
 	}
 };
 
+const getIssue = async (issueNumber) => {
+	try {
+		const { owner } = github.context.payload.repository;
+		const payload = {
+			owner: owner.name ?? owner.login,
+			repo: github.context.payload.repository.name,
+			issue_number: issueNumber,
+		};
+
+		const content = await Promise.all([
+			octokit.request('GET /repos/{owner}/{repo}/issues/{issue_number}', payload),
+		]);
+		return content;
+	} catch ({ message }) {
+		throw new Error(`Failed to find Issue: ${message}`);
+	}
+};
+
 const run = async () => {
 	const { pr, base } = extractInputs();
 	if (!pr) {
@@ -8511,14 +8528,24 @@ const run = async () => {
 
 	const [merged, prData] = await getPR(pr);
 
-	if (merged && prData.data.base.ref === base) {
-		const match = prData.data.head.ref.match(/ISSUE_(\d+)/i);
-		if (match.length > 1) {
-			const issueNum = match[1];
-			core.setOutput('issue-number', issueNum);
-		} else {
-			console.log(`could not extract issue number from ${prData.data.head.ref}`);
+	const match = prData.data.head.ref.match(/ISSUE_(\d+)/i);
+	if (match.length > 1) {
+		const issueNum = match[1];
+		if (issueNum) {
+			const [issueData] = await getIssue(issueNum);
+			if (issueData.data.node_id) {
+				core.setOutput('content-id', issueData.data.node_id);
+			} else {
+				console.log(`${!issueData.data.node_id ? '' : 'could not find issue node_id'}. No action needed`);
+			}
 		}
+		core.setOutput('issue-number', issueNum);
+	} else {
+		console.log(`could not extract issue number from ${prData.data.head.ref}`);
+	}
+
+	if (merged && prData.data.base.ref === base) {
+		core.setOutput('merged', merged);
 	} else {
 		console.log(`${!merged ? 'PR not merged' : `base is not ${base}`}. No action needed`);
 	}
