@@ -5,7 +5,12 @@ let octokit;
 
 const extractInputs = () => {
 	const pr = parseInt(core.getInput('pr'), 10);
-	const base = core.getInput('base');
+	let base = '';
+	try {
+		base = core.getInput('base');
+	} catch (error) {
+		base = false;
+	}
 
 	const token = core.getInput('github-token');
 	octokit = github.getOctokit(token);
@@ -74,10 +79,12 @@ const run = async () => {
 		console.log(`could not extract issue number from ${prData.data.head.ref}`);
 	}
 
-	if (merged && prData.data.base.ref === base) {
-		core.setOutput('merged', merged);
-	} else {
-		console.log(`${!merged ? 'PR not merged' : `base is not ${base}`}. No action needed`);
+	if (base) {
+		if (merged && prData.data.base.ref === base) {
+			core.setOutput('merged', merged);
+		} else {
+			core.setOutput('merged', false);
+		}
 	}
 };
 run().catch((err) => {
