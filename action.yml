@@ -3,7 +3,7 @@ description: Extract issue number from the branch name of a PR
 inputs:
   base:
     description: "Base branch to expect PRs from"
-    required: true
+    required: false
   pr:
     description: "PR number"
     required: true
@@ -15,6 +15,12 @@ outputs:
   issue-number:
     description: 'issue number extracted'
     value: ${{ steps.parse.outputs.issue-number }}
+  content-id:
+    description: 'issue number extracted'
+    value: ${{ steps.parse.outputs.content-id }}
+  merged:
+    description: 'boolean of if we are merged to the base'
+    value: ${{ steps.parse.outputs.merged }}
 runs:
   using: 'node16'
   main: 'dist/index.js'
