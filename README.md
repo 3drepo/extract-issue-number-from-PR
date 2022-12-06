@@ -20,10 +20,11 @@ github token to allow access to the API
 
 ### `issue-number`
 
-Issue number extracted
+Issue number extracted from the PR
+
 ### `content-id`
 
-GraphQL API content-id for the issue
+GraphQL API content-id for the issue extracted from the PR
 
 ### `merged`
 
