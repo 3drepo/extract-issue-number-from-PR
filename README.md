@@ -22,9 +22,13 @@ github token to allow access to the API
 
 Issue number extracted from the PR
 
-### `content-id`
+### `issue-content-id`
 
-GraphQL API content-id for the issue extracted from the PR
+GraphQL API issue-content-id for the issue extracted from the PR
+
+### `pr-content-id`
+
+GraphQL API pr-content-id for the issue extracted from the PR
 
 ### `merged`
 
@@ -44,7 +48,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs: 
       issue-number: ${{ steps.commitMsgParser.outputs.issue-number }}
-      content-id: ${{ steps.commitMsgParser.outputs.content-id }}
+      issue-content-id: ${{ steps.commitMsgParser.outputs.issue-content-id }}
+      pr-content-id: ${{ steps.commitMsgParser.outputs.pr-content-id }}
       merged: ${{ steps.commitMsgParser.outputs.merged }}
     steps:
       - name: Extract Issue Number from PR

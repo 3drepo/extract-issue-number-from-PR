@@ -63,13 +63,20 @@ const run = async () => {
 
 	const [merged, prData] = await getPR(pr);
 
+	if (prData.data.node_id) {
+		core.setOutput('pr-content-id', prData.data.node_id);
+	} else {
+		console.log(`${!prData.data.node_id ? '' : 'could not find PR issue node_id'}. No action needed`);
+	}
+
 	const match = prData.data.head.ref.match(/ISSUE_(\d+)/i);
+
 	if (match.length > 1) {
 		const issueNum = match[1];
 		if (issueNum) {
 			const [issueData] = await getIssue(issueNum);
 			if (issueData.data.node_id) {
-				core.setOutput('content-id', issueData.data.node_id);
+				core.setOutput('issue-content-id', issueData.data.node_id);
 			} else {
 				console.log(`${!issueData.data.node_id ? '' : 'could not find issue node_id'}. No action needed`);
 			}
